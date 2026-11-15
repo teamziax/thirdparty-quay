@@ -35,9 +35,9 @@ project {
  * publishing and names it.
  */
 enum class Input(val value: String?) {
-    // A quay.io robot with write on quay.io/ziax/quay: its name, and its token.
-    QUAY_USERNAME(null),
-    QUAY_PASSWORD(null),
+    // A quay.io robot with write on quay.io/ziax/quay: its name, and its token. Set up 2026-11-15.
+    QUAY_USERNAME("credentialsJSON:e59cc3b4-3264-4933-b355-0c33db3327f3"),
+    QUAY_PASSWORD("credentialsJSON:6e412197-d358-46a5-9847-65712252154f"),
 }
 
 object BuildImage : BuildType({

@@ -14,7 +14,7 @@ TeamCity reads this directory through versioned settings from the VCS root's def
 
 ## Inputs
 
-The robot's login is two secure values, `QUAY_USERNAME` and `QUAY_PASSWORD` (`Input` in `settings.kts`): a quay.io robot with write on `quay.io/ziax/quay`. To set one up, in this project: *Project Settings → Actions → Generate token for a secure value*, paste the value, and put the `credentialsJSON:…` it returns in the input's `value`. Tokens work only in the project that generated them. Until both have one, a build builds and tests its image, then fails without publishing and names them.
+The robot's login is two secure values, `QUAY_USERNAME` and `QUAY_PASSWORD` (`Input` in `settings.kts`): a quay.io robot with write on `quay.io/ziax/quay`. To set one up, in this project: *Project Settings → Actions → Generate token for a secure value*, paste the value, and put the `credentialsJSON:…` it returns in the input's `value`. Tokens work only in the project that generated them. Both were set up on 2026-11-15. Without one, a build builds and tests its image, then fails without publishing and names it.
 
 ## Checking a change locally
 
