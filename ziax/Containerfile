@@ -1,3 +1,5 @@
+# check=skip=InvalidDefaultArgInFrom
+# (A BuildKit parser directive: BASE_IMAGE has no default because build.sh always passes it.)
 # Quay with teamziax/thirdparty-quay's changes: the upstream image, with the files a fork commit changes written over
 # it. build.sh puts those files in overlay/ and checks that each is a Python module or Jinja template the upstream
 # image already has, so nothing upstream's build compiled or bundled needs to run again.

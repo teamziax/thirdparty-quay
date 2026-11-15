@@ -146,7 +146,9 @@ fi
 [ "$ENGINE" = docker ] || fail "Only CONTAINER_ENGINE=docker publishes"
 AUTH_FILE="${REGISTRY_AUTH_FILE:-${DOCKER_CONFIG:-$HOME/.docker}/config.json}"
 [ -f "$AUTH_FILE" ] || fail "PUSH=true needs a registry login in $AUTH_FILE"
-SKOPEO_IMAGE=quay.io/skopeo/stable:v1.22.3@sha256:249b92db7297e5c801e19172dbb3b56fde88094a49740a5ededac8c2958bf2c0
+# By version alone: upstream rebuilds this tag every day or two and quay.io garbage-collects the digests it leaves,
+# so a digest pinned here stops resolving within weeks (the one okd/build.sh pins was gone by 2026-11-15).
+SKOPEO_IMAGE=quay.io/skopeo/stable:v1.22.3
 skopeo() {
   local -r socket="${DOCKER_HOST:-unix:///var/run/docker.sock}"
   docker run --rm \
