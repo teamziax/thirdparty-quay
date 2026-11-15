@@ -1,8 +1,11 @@
 import os
 import re
+import shutil
 
 import jinja2
 import pytest
+
+from .. import nginx_conf_create
 
 
 def render_server_base_conf(**kwargs):
@@ -20,6 +23,7 @@ def render_server_base_conf(**kwargs):
         maximum_layer_size="20G",
         enable_rate_limits=False,
         manifests_endpoint_read_timeout=None,
+        blob_upload_client_body_buffer_size=None,
     )
     defaults.update(kwargs)
     return template.render(**defaults)
@@ -77,3 +81,54 @@ class TestErrorPageDirective:
         assert "patternfly" not in re.search(
             r"location = /502\.html \{([^}]*)}", rendered, re.DOTALL
         ).group(1)
+
+
+def _blob_location(rendered):
+    match = re.search(
+        r"location ~ /v2/\(\[.*?\]\+\)\(/\[.*?\]\+\)\+/blobs/ \{(.*?)\n\}",
+        rendered,
+        re.DOTALL,
+    )
+    assert match is not None, "blob location block not found in rendered config"
+    return match.group(1)
+
+
+def render_generated_server_base_conf(tmp_path, monkeypatch, config):
+    os.mkdir(tmp_path / "nginx")
+    shutil.copy(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../nginx/server-base.conf.jnj",
+        ),
+        tmp_path / "nginx",
+    )
+    monkeypatch.setattr(nginx_conf_create, "QUAYCONF_DIR", str(tmp_path))
+    nginx_conf_create.generate_server_config(config)
+    return (tmp_path / "nginx/server-base.conf").read_text()
+
+
+class TestBlobUploadClientBodyBufferSize:
+    def test_omits_client_body_buffer_size_when_unset(self):
+        rendered = render_server_base_conf()
+        assert "client_body_buffer_size" not in rendered
+
+    @pytest.mark.parametrize("value", ["4m", "1024k", "16M", "65536"])
+    def test_renders_client_body_buffer_size_when_set(self, value):
+        rendered = render_server_base_conf(blob_upload_client_body_buffer_size=value)
+        blob_block = _blob_location(rendered)
+        assert f"client_body_buffer_size {value};" in blob_block
+
+    def test_client_body_buffer_size_is_scoped_to_blob_location(self):
+        rendered = render_server_base_conf(blob_upload_client_body_buffer_size="4m")
+        assert rendered.count("client_body_buffer_size") == 1
+        assert "client_body_buffer_size 4m;" in _blob_location(rendered)
+
+    def test_generate_server_config_reads_config_key(self, tmp_path, monkeypatch):
+        rendered = render_generated_server_base_conf(
+            tmp_path, monkeypatch, {"BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE": "4m"}
+        )
+        assert "client_body_buffer_size 4m;" in _blob_location(rendered)
+
+    def test_generate_server_config_omits_it_by_default(self, tmp_path, monkeypatch):
+        rendered = render_generated_server_base_conf(tmp_path, monkeypatch, {})
+        assert "client_body_buffer_size" not in rendered

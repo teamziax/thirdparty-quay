@@ -305,6 +305,12 @@ location ~ /v2/([^/]+)(/[^/]+)+/blobs/ {
     proxy_send_timeout 2000;
     proxy_temp_path /tmp 1 2;
 
+    # Uploads stream to the registry unbuffered, so over HTTP/2 this buffer is also each
+    # upload's flow-control window: at most one buffer in flight per round trip.
+    {% if blob_upload_client_body_buffer_size %}
+    client_body_buffer_size {{ blob_upload_client_body_buffer_size }};
+    {% endif %}
+
     client_max_body_size {{ maximum_layer_size }};
     http2_chunk_size 32k;
 

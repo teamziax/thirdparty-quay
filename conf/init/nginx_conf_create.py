@@ -113,6 +113,7 @@ def generate_server_config(config):
     maximum_layer_size = config.get("MAXIMUM_LAYER_SIZE", "20G")
     enable_rate_limits = config.get("FEATURE_RATE_LIMITS", False)
     manifests_endpoint_read_timeout = config.get("MANIFESTS_ENDPOINT_READ_TIMEOUT", None)
+    blob_upload_client_body_buffer_size = config.get("BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE", None)
 
     # Get default UI setting from config
     default_ui = config.get("DEFAULT_UI", "react").lower()
@@ -129,6 +130,7 @@ def generate_server_config(config):
         enable_rate_limits=enable_rate_limits,
         static_dir=STATIC_DIR,
         manifests_endpoint_read_timeout=manifests_endpoint_read_timeout,
+        blob_upload_client_body_buffer_size=blob_upload_client_body_buffer_size,
         default_ui=default_ui,
     )
 

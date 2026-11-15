@@ -193,3 +193,24 @@ def test_programmatic_token_k8s_namespace_rejects_invalid_dns_labels(value):
 
     with pytest.raises(ValidationError):
         validate(value, schema)
+
+
+class TestNginxBufferSizeSchema:
+    @pytest.mark.parametrize("value", ["4m", "4M", "1024k", "1024K", "65536", "16m"])
+    def test_blob_upload_buffer_size_accepts_nginx_sizes(self, value):
+        schema = CONFIG_SCHEMA["properties"]["BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE"]
+        validate(value, schema)
+
+    @pytest.mark.parametrize(
+        "value", ["0", "0k", "04m", "4g", "4G", "4mb", "4 m", "-1", "1.5m", "m", "abc", ""]
+    )
+    def test_blob_upload_buffer_size_rejects_invalid_format(self, value):
+        schema = CONFIG_SCHEMA["properties"]["BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE"]
+        with pytest.raises(ValidationError):
+            validate(value, schema)
+
+    @pytest.mark.parametrize("value", [4194304, 0, True])
+    def test_blob_upload_buffer_size_rejects_non_string_values(self, value):
+        schema = CONFIG_SCHEMA["properties"]["BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE"]
+        with pytest.raises(ValidationError):
+            validate(value, schema)
