@@ -1,0 +1,20 @@
+# Quay with teamziax/thirdparty-quay's changes: the upstream image, with the files a fork commit changes written over
+# it. build.sh puts those files in overlay/ and checks that each is a Python module or Jinja template the upstream
+# image already has, so nothing upstream's build compiled or bundled needs to run again.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Each file's content is written into the existing file, so every owner and mode bit stays as the upstream image has
+# it. OpenShift runs Quay as an arbitrary user in group 0, which needs the group-write bits upstream sets on conf/;
+# copying directories over the image could reset them.
+USER root
+RUN --mount=type=bind,source=overlay,target=/tmp/overlay \
+    set -eu; \
+    cd /tmp/overlay; \
+    find . -type f | sort | while read -r file; do \
+        target="/quay-registry/${file#./}"; \
+        if [ ! -f "$target" ]; then echo "The base image has no $target" >&2; exit 1; fi; \
+        cat "$file" > "$target"; \
+        echo "Wrote $target"; \
+    done
+USER 1001
