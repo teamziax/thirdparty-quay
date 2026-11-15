@@ -332,6 +332,12 @@ location ~ /v2/([^/]+)(/[^/]+)+/blobs/ {
     client_body_timeout {{ blob_upload_client_body_timeout }};
     {% endif %}
 
+    # Uploads stream to the registry unbuffered, so over HTTP/2 this buffer is also each
+    # upload's flow-control window: at most one buffer in flight per round trip.
+    {% if blob_upload_client_body_buffer_size %}
+    client_body_buffer_size {{ blob_upload_client_body_buffer_size }};
+    {% endif %}
+
     {% if blob_upload_lingering_close %}
     lingering_close {{ blob_upload_lingering_close }};
     {% endif %}

@@ -2034,6 +2034,12 @@ CONFIG_SCHEMA = {
             "description": "Nginx client body timeout in seconds for blob upload endpoints. Set this to match or exceed the load balancer idle timeout to prevent 408/502 errors during large uploads. Defaults to nginx's 60s when not set.",
             "x-example": "3600",
         },
+        "BLOB_UPLOAD_CLIENT_BODY_BUFFER_SIZE": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*[kKmM]?$",
+            "description": "Nginx client_body_buffer_size for blob upload endpoints, in bytes or with a k or m suffix. Uploads are streamed unbuffered, so over HTTP/2 this is also each upload's flow-control window: when not set, an HTTP/2 upload can send only 64 KiB per round trip (under 1 MB/s at 75 ms). Set it to at least the clients' bandwidth-delay product. Nginx holds up to this much memory per upload in flight.",
+            "x-example": "4m",
+        },
         "BLOB_UPLOAD_LINGERING_CLOSE": {
             "type": "string",
             "enum": ["on", "off", "always"],
